@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <!-- CUSTOMIZE: replace brand-mark text and brand-name, or remove brand-mark span entirely -->
+      <a href="{{ '/' | relative_url }}" class="site-brand">
+        <span class="brand-mark">▸</span>
+        <span class="brand-name">{{ site.title }}</span>
+      </a>
+      <!-- CUSTOMIZE: add/remove nav links to match your sections -->
+      <nav class="site-nav">
+        <a href="{{ '/section-name/index' | relative_url }}">Section</a>
+        <div class="nav-search" id="navSearchWrap">
+          <form action="{{ '/' | relative_url }}" method="get" id="navSearchForm" autocomplete="off">
+            <input id="navSearch" name="q" type="search" placeholder="Search vault…" autocomplete="off" aria-label="Search vault" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="navSearchDropdown">
+          </form>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Dropdown lives outside the header to avoid stacking context clipping -->
+  <div class="nav-search-dropdown" id="navSearchDropdown" role="listbox" aria-label="Search results"></div>
+
+  <main class="page-main">
+    {{ content }}
+  </main>
+
+  <!-- CUSTOMIZE: replace footer-rule with your team's north-star statement -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-rule">One team. One problem. Nothing else.</span>
+      <span class="footer-meta">{{ site.title }}</span>
+    </div>
+  </footer>
+
+
+<script>
+(function(){
+  var BASE = '{{ "/" | relative_url }}';
+  if (BASE === '/') BASE = '';
+
+  var VAULT = [
+    // ADD YOUR PAGES HERE — one entry per page in your vault.
+    // Format: { title:'Page Title', path:'/section/filename', desc:'One-line description' }
+    // Claude will keep this list in sync as it adds new pages to your vault.
+    { title:'Section Hub', path:'/section-name/index', desc:'Replace with your first real page description' },
+  ];
+
+  var input    = document.getElementById('navSearch');
+  var dropdown = document.getElementById('navSearchDropdown');
+  var form     = document.getElementById('navSearchForm');
+  if (!input || !dropdown) return;
+
+  var activeIdx = -1;
+  var currentResults = [];
+
+  function positionDropdown() {
+    var rect = input.getBoundingClientRect();
+    dropdown.style.top  = (rect.bottom + 4) + 'px';
+    dropdown.style.left = 'auto';
+    dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+  }
+
+  function show(items) {
+    currentResults = items;
+    activeIdx = -1;
+    if (!items.length) { hide(); return; }
+    dropdown.innerHTML = items.map(function(item, i) {
+      return '<a class="nsd-item" href="' + BASE + item.path + '" role="option" data-idx="' + i + '">' +
+        '<span class="nsd-title">' + escHtml(item.title) + '</span>' +
+        '<span class="nsd-desc">' + escHtml(item.desc) + '</span>' +
+        '</a>';
+    }).join('');
+    positionDropdown();
+    dropdown.style.display = 'block';
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  function hide() {
+    dropdown.style.display = 'none';
+    dropdown.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false');
+    activeIdx = -1;
+    currentResults = [];
+  }
+
+  function setActive(idx) {
+    var items = dropdown.querySelectorAll('.nsd-item');
+    items.forEach(function(el, i) {
+      el.classList.toggle('nsd-item--active', i === idx);
+    });
+    activeIdx = idx;
+    if (idx >= 0 && items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  input.addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    if (!q) { hide(); return; }
+    var hits = VAULT.filter(function(item) {
+      return item.title.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q);
+    }).slice(0, 8);
+    show(hits);
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (!currentResults.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive(Math.min(activeIdx + 1, currentResults.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive(Math.max(activeIdx - 1, 0));
+    } else if (e.key === 'Enter') {
+      if (activeIdx >= 0 && currentResults[activeIdx]) {
+        e.preventDefault();
+        window.location.href = BASE + currentResults[activeIdx].path;
+      }
+    } else if (e.key === 'Escape') {
+      hide();
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('navSearchWrap');
+    if (wrap && !wrap.contains(e.target)) hide();
+  });
+
+  // Prevent default form submit — we navigate from dropdown or keyboard
+  if (form) form.addEventListener('submit', function(e) { e.preventDefault(); });
+})();
+</script>
+</body>
+</html>

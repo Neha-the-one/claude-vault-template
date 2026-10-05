@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="{{ '/' | relative_url }}" class="site-brand">
+        <span class="brand-mark">▸</span>
+        <span class="brand-name">{{ site.title }}</span>
+      </a>
+      <nav class="site-nav">
+        <a href="{{ '/problem/problem-statement' | relative_url }}">Problem</a>
+        <a href="{{ '/gtm/index' | relative_url }}">GTM</a>
+        <a href="{{ '/customers/themes' | relative_url }}">Customers</a>
+        <a href="{{ '/architecture/overview' | relative_url }}">Architecture</a>
+        <a href="{{ '/decisions/log' | relative_url }}">Decisions</a>
+        <a href="{{ '/team/roster' | relative_url }}">Team</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="prose">
+      {{ content }}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-rule">One team. One problem. Nothing else.</span>
+      <span class="footer-meta">{{ site.title }}</span>
+    </div>
+  </footer>
+
+</body>
+</html>
